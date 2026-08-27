@@ -20,7 +20,22 @@ service cloud.firestore {
     // Items inside the user's cart
     match /carts/{cartID}/items/{itemID} {
       // TODO: Change these! Anyone can read or write. (changed)
-      allow read, write: if false;
+      // allow read, write: if false; // <- allow if user has same UID as owner UID on cart document:
+      allow read, write: if get(/databases/$(database)/documents/carts/$(cartID)).data.ownerUID == request.auth.uid;
+      /*   
+      FAILING TESTS SHOULD NOW PASS:
+      shopping cart items
+           1) can be read only by the cart owner
+           2) can be added only by the cart owner
+
+      -----------------------------------------------------------------------
+      ASIDE: WHEN CAN YOU USE A `resource` OR MAKE A `get` CALL?
+
+      You can use the `resource` object when the required data is part of the
+      current document being read/written.
+      If you need data outside the current document, use a `get` statement. 
+      Note that these operations count towards your Firestore bill!
+      */
     }
 
     // All items available in the store. Users can read
