@@ -1,5 +1,6 @@
 rules_version = '2';
 service cloud.firestore {
+  // NOTE: FOR A PRODUCTION APP, ADD THESE TESTS TO OUR CONTINUOUS INTEGRATION PIPELINE.
   match /databases/{database}/documents {
     // User's cart metadata
     match /carts/{cartID} {
