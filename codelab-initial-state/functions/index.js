@@ -12,31 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const admin = require('firebase-admin');
-const functions = require('firebase-functions');
+const admin = require("firebase-admin");
+const functions = require("firebase-functions");
 const db = admin.initializeApp().firestore();
 
 // Recalculates the total cost of a cart; triggered when there's a change
 // to any items in a cart.
-exports.calculateCart = functions
-    .firestore.document("carts/{cartId}/items/{itemId}")
-    .onWrite(async (change, context) => {
-      console.log(`onWrite: ${change.after.ref.path}`);
-      if (!change.after.exists) {
-        // Ignore deletes
-        return;
-      }
+exports.calculateCart = functions.firestore
+  .document("carts/{cartId}/items/{itemId}")
+  .onWrite(async (change, context) => {
+    console.log(`onWrite: ${change.after.ref.path}`);
+    if (!change.after.exists) {
+      // Ignore deletes
+      return;
+    }
 
-      let totalPrice = 125.98;
-      let itemCount = 8;
-      try {
+    let totalPrice = 125.98;
+    let itemCount = 8;
+    try {
+      const cartRef = db.collection("carts").doc(context.params.cartId);
 
-        const cartRef = db.collection("carts").doc(context.params.cartId);
-
-        await cartRef.update({
-          totalPrice,
-          itemCount
-        });
-      } catch(err) {
-      }
-    });
+      await cartRef.update({
+        totalPrice,
+        itemCount,
+      });
+    } catch (err) {}
+  });
