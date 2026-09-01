@@ -27,14 +27,37 @@ exports.calculateCart = functions.firestore
       return;
     }
 
-    let totalPrice = 125.98;
-    let itemCount = 8;
     try {
+      let totalPrice = 0;
+      let itemCount = 0;
+
       const cartRef = db.collection("carts").doc(context.params.cartId);
+      const itemsSnap = await cartRef.collection("items").get();
+
+      itemsSnap.docs.forEach((item, i) => {
+        const itemData = item.data();
+        console.log("itemData %d: ", i, itemData);
+        // itemData 0:  {
+        //   description: 'The perfect gift for Dads, Grads, or people named Chad!',
+        //   price: '26.99',
+        //   imageUrl: 'https://placeimg.com/720/700/tech',
+        //   name: 'Hip Dog Toy'
+        // }
+        if (itemData.price) {
+          // If not specified, quantity is 1
+          const quantity = itemData.quantity ? itemData.quantity : 1;
+          itemCount += quantity;
+          totalPrice += (itemData.price * quantity);
+        }
+
+      });
 
       await cartRef.update({
         totalPrice,
         itemCount,
       });
-    } catch (err) {}
+      console.log("Cart total successfully recalculated: ", totalPrice);
+    } catch (err) {
+      console.warn("update error", err);
+    }
   });
